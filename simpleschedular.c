@@ -8,9 +8,10 @@
 
 extern int NCPU;
 extern queue q;
-void add_process(int pid, int priority){
+void add_process(int pid, int priority,char* str){
     // create a new member with pid=pid and priority=priority
     member m;
+    m.command_name=str;
     m.pid=pid;
     m.priority=priority;
     m.finished=0;
