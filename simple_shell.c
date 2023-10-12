@@ -106,7 +106,6 @@ for (i = 0; i < strlen(command); i++) {
         wait(NULL); // Wait for the child process to complete
         // at this point the child process has finished, so remove the process 
         remove_process(pid);
-        
     }
    
     return 0; 
@@ -239,6 +238,62 @@ void ctrlCHandler(int signum) {
         return;
       }      
     }
+
+    double* totalTime[4];
+    double* totalCount[4];
+    for(i=q.low;i<q.high;i++){
+            totalTime[q.members[i].priority-1]+=q.members[i].execution_time;
+            totalCount[q.members[i].priority-1]+=q.members[i].execution_time;
+    }
+
+    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 1: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,(totalTime[0]/totalCount[0]),strlen((totalTime[0]/totalCount[0])));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 1");
+        return;
+      }
+    
+    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 2: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,(totalTime[1]/totalCount[1]),strlen((totalTime[1]/totalCount[1])));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 2");
+        return;
+      }
+
+    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 3: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,(totalTime[2]/totalCount[2]),strlen((totalTime[2]/totalCount[2])));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 3");
+        return;
+      }
+
+    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 4: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,(totalTime[3]/totalCount[3]),strlen((totalTime[3]/totalCount[3])));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 4");
+        return;
+      }
+
     exit(0);
 }
 int main(int argc, char** argv) {
