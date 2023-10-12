@@ -1,6 +1,7 @@
 #ifndef SOME_HEADER_GUARD_WITH_UNIQUE_NAME
 #define SOME_HEADER_GUARD_WITH_UNIQUE_NAME
 struct Member{
+   char* command_name[10000];
    int pid;
    int priority;
    int finished;
