@@ -179,6 +179,68 @@ void handle_alarm(){
   // call schedular 
   schedule_process();
 }
+// Ctrl C handler for displaying details 
+void ctrlCHandler(int signum) {
+    int i;
+    for(i=q.low;i<q.high;i++){
+
+     char output1[]=("\nTHE PID OF THE PROCESS IS: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,q.members[i].pid,strlen(q.members[i].pid));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE PID TABLE");
+        return;
+      }
+
+      char output2[]=("\nTHE NAME OF THE PROCESS IS :");
+      bytes_tot=write(1,output2,strlen(output2));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE MESSAGE FOR THE NAME OF THE PROCESS");
+      return;
+      }
+      bytes_tot=write(1,q.members[i].command_name,strlen(q.members[i].command_name));
+      if((bytes_tot)==-1){
+       printf("FAILED TO WRITE THE NAME");
+       return;
+      }
+
+      char output3[]=("\nTHE EXECTUTION TIME OF THE PROCESS IS :");
+      bytes_tot=write(1,output3,strlen(output3));
+      if(bytes_tot==-1){
+        printf("ERROR IN PRINTING EXECUTION TIME OF THE PROCESS");
+        return;
+      }
+      bytes_tot=write(1,q.members[i].execution_time,strlen(q.members[i].execution_time));
+      if(bytes_tot==-1){
+       printf("ERROR IN PRINTING THE THE ACTUAL EXECUTION TIME OF THE PROCESS");
+       return;
+      }
+
+      char output3[]=("\nTHE WAITING TIME OF THE PROCESS IS :");
+      bytes_tot=write(1,output3,strlen(output3));
+      if(bytes_tot==-1){
+        printf("ERROR IN PRINTING WAITING TIME OF THE PROCESS");
+        return;
+      }
+      bytes_tot=write(1,q.members[i].wait_time,strlen(q.members[i].wait_time));
+      if(bytes_tot==-1){
+       printf("ERROR IN PRINTING THE THE ACTUAL WAITING TIME OF THE PROCESS");
+       return;
+      }
+
+      char output4[]=("\n");
+      bytes_tot=write(1,output4,strlen(output4));
+      if(bytes_tot==-1){
+        printf("ERROR IN WRITING THE BACKLASH N");
+        return;
+      }      
+    }
+    exit(0);
+}
 int main(int argc, char** argv) {
    member membrs[1000];
    queue q={0,0,membrs[1000]};
