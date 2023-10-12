@@ -6,6 +6,9 @@ struct Member{
    int finished;
    int running;
    clock_t lastime;
+   clock_t lastime2;
+   double execution_time;
+   double wait_time;
    };
 struct Queue{
    int low;
