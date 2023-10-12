@@ -1,4 +1,4 @@
-#include <stdio.h>
+c#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -101,7 +101,7 @@ for (i = 0; i < strlen(command); i++) {
         }
         
     } if(status>0) {
-        add_process(pid,priority);
+        add_process(pid,priority,command_name);
         // at this i need to start the timer for the waititng time for the process with pid=pid
         wait(NULL); // Wait for the child process to complete
         // at this point the child process has finished, so remove the process 
