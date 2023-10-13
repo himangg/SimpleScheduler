@@ -1,21 +1,23 @@
-
 #include <stdio.h>
 #include "helper.h"
 #include <signal.h>
 #include <sys/time.h>
-
+#include <string.h>
 
 extern int NCPU;
 extern queue q;
 
-void add_process(int pid, int priority){
+void add_process(int pid, int priority,char* command2){
     // create a new member with pid=pid and priority =priority
+    printf("THE COMMAND IS\n");
+    printf("%s",command2);
     
     member m;
     m.pid=pid;
     m.priority=priority;
     m.finished=0;
     m.running=0;
+    strcpy(m.command,command2);
     // now add this member into the priority queue
     m.lastime=clock();// saving the time for calculation of wait time
     m.wait_time=0;
@@ -23,6 +25,10 @@ void add_process(int pid, int priority){
     q.members[q.high]=m;
     q.members[q.high].lastime=clock();
     q.members[q.high].finished=0;
+    q.members[q.high].running=0;
+    q.members[q.high].priority=priority;
+    printf("THE IDX IS\n");
+    printf("%d",q.high);
     q.high++;  
 }
 void schedule_process(){
@@ -66,12 +72,12 @@ void schedule_process(){
 }
      for(j=4;j>=1;j--){ 
      int itr=l_idx[j]+1;
-     printf("EXECUTED");
+     //printf("EXECUTED");
      fflush(stdout);
-     printf("VALUE OF J IS\n");
-     printf("%d",j);
-     printf("VALUE OF l_idx[j] is");
-     printf("%d",l_idx[j]);
+     //printf("VALUE OF J IS\n");
+     //printf("%d",j);
+     //printf("VALUE OF l_idx[j] is");
+     //printf("%d",l_idx[j]);
      if(itr==q.high)itr=q.low;
      if(l_idx[j]!=-1){
      while(itr!=l_idx[j]){
@@ -90,17 +96,27 @@ void schedule_process(){
          itr=q.low;
          }
      }
+        if(q.members[itr].finished==0 && q.members[itr].priority==j && ncpu>0){
+           printf("RESUMING THE PROCESS");
+           fflush(stdout);
+            kill(q.members[itr].pid,SIGCONT);
+            q.members[itr].running=1;
+            q.members[itr].lastime2=clock();
+            q.members[itr].wait_time+=((double) (clock() - q.members[itr].lastime))/CLOCKS_PER_SEC;
+            ncpu--;
+         }
+     
      }
      else{
      
        for(i=q.low;i<q.high;i++){
-         if(q.members[itr].finished==0  && q.members[itr].priority==j && ncpu>0){
+         if(q.members[i].finished==0  && q.members[i].priority==j && ncpu>0){
              printf("RESUMING THE PROCESS");
            fflush(stdout);
-              kill(q.members[itr].pid,SIGCONT);
-             q.members[itr].lastime2=clock();
-             q.members[itr].running=1;
-             q.members[itr].wait_time+=((double) (clock() - q.members[itr].lastime))/CLOCKS_PER_SEC;
+              kill(q.members[i].pid,SIGCONT);
+             q.members[i].lastime2=clock();
+             q.members[i].running=1;
+             q.members[i].wait_time+=((double) (clock() - q.members[i].lastime))/CLOCKS_PER_SEC;
              ncpu--;
          }
        }
@@ -120,14 +136,16 @@ void schedule_process(){
 void remove_process(int pid){
         
         int i;
-       for(i=q.low;i<=q.high;i++){
+       for(i=q.low;i<q.high;i++){
          if(q.members[i].pid==pid){
-          q.members[i].execution_time+=((double) (clock() - q.members[i].lastime2))/CLOCKS_PER_SEC;
+          q.members[i].execution_time=q.members[i].execution_time+((double) (clock() - q.members[i].lastime2))/CLOCKS_PER_SEC;
           q.members[i].finished=1;
+          printf("REMOVED SUCCESFULLY");
           q.members[i].running=0;
           break;
          }
        }
         
 }
+
 
