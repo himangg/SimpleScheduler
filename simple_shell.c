@@ -112,9 +112,9 @@ for (i = 0; i < strlen(command); i++) {
     } if(status>0) {
         
         // at this i need to start the timer for the waititng time for the process with pid=pid
-        //wait(NULL); // Wait for the child process to complete
+        wait(NULL); // Wait for the child process to complete
         // at this point the child process has finished, so remove the process 
-        //remove_process(pid);
+        remove_process(pid);
         
     }
    
@@ -201,6 +201,137 @@ void handler_child(){
        
     }
 }
+// Ctrl C handler for displaying details 
+void ctrlCHandler(int signum) {
+    int i;
+    for(i=q.low;i<q.high;i++){
+
+     char output1[]=("\nTHE PID OF THE PROCESS IS: ");
+      int bytes_tot=write(1,output1,strlen(output1));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      bytes_tot=write(1,q.members[i].pid,strlen(q.members[i].pid));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE PID TABLE");
+        return;
+      }
+
+      char output2[]=("\nTHE NAME OF THE PROCESS IS :");
+      bytes_tot=write(1,output2,strlen(output2));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE MESSAGE FOR THE NAME OF THE PROCESS");
+      return;
+      }
+      bytes_tot=write(1,q.members[i].command,strlen(q.members[i].command));
+      if((bytes_tot)==-1){
+       printf("FAILED TO WRITE THE NAME");
+       return;
+      }
+
+      char output3[]=("\nTHE EXECTUTION TIME OF THE PROCESS IS :");
+      bytes_tot=write(1,output3,strlen(output3));
+      if(bytes_tot==-1){
+        printf("ERROR IN PRINTING EXECUTION TIME OF THE PROCESS");
+        return;
+      }
+      char str1[100]; 
+        sprintf(str1, "%f", q.members[i].execution_time); 
+      bytes_tot=write(1,str1,strlen(str1));
+      if(bytes_tot==-1){
+       printf("ERROR IN PRINTING THE THE ACTUAL EXECUTION TIME OF THE PROCESS");
+       return;
+      }
+
+      char output4[]=("\nTHE WAITING TIME OF THE PROCESS IS :");
+      bytes_tot=write(1,output4,strlen(output4));
+      if(bytes_tot==-1){
+        printf("ERROR IN PRINTING WAITING TIME OF THE PROCESS");
+        return;
+      }
+        char str2[100]; 
+        sprintf(str2, "%f", q.members[i].wait_time); 
+      bytes_tot=write(1,str2,strlen(str2));
+      if(bytes_tot==-1){
+       printf("ERROR IN PRINTING THE THE ACTUAL WAITING TIME OF THE PROCESS");
+       return;
+      }
+
+      char output5[]=("\n");
+      bytes_tot=write(1,output5,strlen(output5));
+      if(bytes_tot==-1){
+        printf("ERROR IN WRITING THE BACKLASH N");
+        return;
+      }      
+    }
+
+    double totalTime[4];
+    double totalCount[4];
+    for(i=q.low;i<q.high;i++){
+            totalTime[q.members[i].priority-1]+=q.members[i].execution_time;
+            totalCount[q.members[i].priority-1]+=q.members[i].execution_time;
+    }
+
+    char output10[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 1: ");
+      int bytes_tot=write(1,output10,strlen(output10));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      char str10[100]; 
+        sprintf(str10, "%f", (totalTime[0]/totalCount[0]));
+      bytes_tot=write(1,str10,strlen(str10));
+      if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 1");
+        return;
+      }
+    
+    char output20[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 2: ");
+      bytes_tot=write(1,output20,strlen(output20));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+      char str20[100]; 
+        sprintf(str20, "%f", (totalTime[1]/totalCount[1]));
+        bytes_tot=write(1,str20,strlen(str20));      
+        if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 2");
+        return;
+      }
+
+    char output30[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 3: ");
+      bytes_tot=write(1,output30,strlen(output30));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+        char str30[100]; 
+        sprintf(str30, "%f", (totalTime[2]/totalCount[2]));
+        bytes_tot=write(1,str30,strlen(str30));        
+        if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 3");
+        return;
+      }
+
+    char output40[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 4: ");
+      bytes_tot=write(1,output40,strlen(output40));
+      if(bytes_tot==-1){
+      printf("FAILED TO WRITE INTO THE MEMORY");
+      return;
+      }
+        char str40[100]; 
+        sprintf(str40, "%f", (totalTime[3]/totalCount[3]));
+        bytes_tot=write(1,str40,strlen(str40));        
+        if(bytes_tot==-1){
+        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 4");
+        return;
+      }
+
+    exit(0);
+}
+
 int main(int argc, char** argv) {
    member membrs[1000];
    queue q={0,0,membrs[1000]};
@@ -229,6 +360,7 @@ int main(int argc, char** argv) {
         }
      }
      else{
+
     /*timer.it_interval.tv_sec = TSLICE;
     timer.it_interval.tv_usec = 0;
     timer.it_value.tv_sec = TSLICE;
