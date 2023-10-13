@@ -11,6 +11,7 @@ struct Member{
    clock_t lastime2;
    double wait_time;
    double execution_time;
+   char  command[10000];
    };
 struct Queue{
    int low;
@@ -19,7 +20,7 @@ struct Queue{
    };
 typedef struct Queue queue;
 typedef struct Member member;
-extern void add_process(int a,int c);
+extern void add_process(int a,int c,char *d);
 extern void schedule_process();
 extern void remove_process(int pid);
 extern queue q;// now this queue will be shared by both the files
