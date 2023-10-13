@@ -1,4 +1,4 @@
-c#include <stdio.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,6 +7,7 @@ c#include <stdio.h>
 #include <time.h>// Include for time function 
 #include <sys/wait.h> // Include for wait function
 #include "helper.h"
+#include <semaphore.h>
 char* history[10000];
 char* pid_table[10000];
 int size1=0;
@@ -59,8 +60,9 @@ for (i = 0; i < strlen(command); i++) {
     }
 }
 
-    if(pid>0){
-       kill(pid,SIGSTOP);//pausing the child process
+    if(pid>0 && command[0]=='s'){
+       add_process(pid,priority);// added into queue of parent process 
+       kill(pid,SIGSTOP);//pausing the child process iff it is sumbit otherwise it is aforeground process 
        
     }
     if (status < 0) {
@@ -68,8 +70,15 @@ for (i = 0; i < strlen(command); i++) {
         exit(1); // Exit with an error code
     }if (status == 0) {
         // Child process
+        
         // child process has started 
-        clock_t
+        if(command[0]!='s' ){
+           char *argv[]={"/bin/sh","-c",command,NULL};
+           execvp("/bin/sh",argv);
+           printf("ERROR");
+           exit(1);
+        }
+        else{
         char* command_2=(char*)malloc(strlen(command)-1);// command_2 will just include the string without any \0 or '\n'
         int i;
         for(i=0;i<strlen(command)-1;i++)command_2[i]=command[i];
@@ -99,13 +108,14 @@ for (i = 0; i < strlen(command); i++) {
         printf("ERROR WHILE OPENING THE NEW PROCESS THROUGH THE EXECVP\n");
         exit(1); // Exit with an error code
         }
-        
+        }
     } if(status>0) {
-        add_process(pid,priority,command);
+        
         // at this i need to start the timer for the waititng time for the process with pid=pid
-        wait(NULL); // Wait for the child process to complete
+        //wait(NULL); // Wait for the child process to complete
         // at this point the child process has finished, so remove the process 
-        remove_process(pid);
+        //remove_process(pid);
+        
     }
    
     return 0; 
@@ -174,127 +184,22 @@ void shell_loop() {
         free(command);
     } while (status);
 }
-void handle_alarm(){
+/*void handle_alarm(){
   // call schedular 
   schedule_process();
+}*/
+void signal_handler(){
+   schedule_process();
 }
-// Ctrl C handler for displaying details 
-void ctrlCHandler(int signum) {
-    int i;
-    for(i=q.low;i<q.high;i++){
+void handler_child(){
+   int status;
+    pid_t child_pid;
 
-     char output1[]=("\nTHE PID OF THE PROCESS IS: ");
-      int bytes_tot=write(1,output1,strlen(output1));
-      if(bytes_tot==-1){
-      printf("FAILED TO WRITE INTO THE MEMORY");
-      return;
-      }
-      bytes_tot=write(1,q.members[i].pid,strlen(q.members[i].pid));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE PID TABLE");
-        return;
-      }
-
-      char output2[]=("\nTHE NAME OF THE PROCESS IS :");
-      bytes_tot=write(1,output2,strlen(output2));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE MESSAGE FOR THE NAME OF THE PROCESS");
-      return;
-      }
-      bytes_tot=write(1,q.members[i].command_name,strlen(q.members[i].command_name));
-      if((bytes_tot)==-1){
-       printf("FAILED TO WRITE THE NAME");
-       return;
-      }
-
-      char output3[]=("\nTHE EXECTUTION TIME OF THE PROCESS IS :");
-      bytes_tot=write(1,output3,strlen(output3));
-      if(bytes_tot==-1){
-        printf("ERROR IN PRINTING EXECUTION TIME OF THE PROCESS");
-        return;
-      }
-      bytes_tot=write(1,q.members[i].execution_time,strlen(q.members[i].execution_time));
-      if(bytes_tot==-1){
-       printf("ERROR IN PRINTING THE THE ACTUAL EXECUTION TIME OF THE PROCESS");
-       return;
-      }
-
-      char output3[]=("\nTHE WAITING TIME OF THE PROCESS IS :");
-      bytes_tot=write(1,output3,strlen(output3));
-      if(bytes_tot==-1){
-        printf("ERROR IN PRINTING WAITING TIME OF THE PROCESS");
-        return;
-      }
-      bytes_tot=write(1,q.members[i].wait_time,strlen(q.members[i].wait_time));
-      if(bytes_tot==-1){
-       printf("ERROR IN PRINTING THE THE ACTUAL WAITING TIME OF THE PROCESS");
-       return;
-      }
-
-      char output4[]=("\n");
-      bytes_tot=write(1,output4,strlen(output4));
-      if(bytes_tot==-1){
-        printf("ERROR IN WRITING THE BACKLASH N");
-        return;
-      }      
+    // Reap terminated child processes
+    while ((child_pid = waitpid(-1, &status, WNOHANG)) > 0) {
+          remove_process(child_pid);
+       
     }
-
-    double* totalTime[4];
-    double* totalCount[4];
-    for(i=q.low;i<q.high;i++){
-            totalTime[q.members[i].priority-1]+=q.members[i].execution_time;
-            totalCount[q.members[i].priority-1]+=q.members[i].execution_time;
-    }
-
-    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 1: ");
-      int bytes_tot=write(1,output1,strlen(output1));
-      if(bytes_tot==-1){
-      printf("FAILED TO WRITE INTO THE MEMORY");
-      return;
-      }
-      bytes_tot=write(1,(totalTime[0]/totalCount[0]),strlen((totalTime[0]/totalCount[0])));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 1");
-        return;
-      }
-    
-    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 2: ");
-      int bytes_tot=write(1,output1,strlen(output1));
-      if(bytes_tot==-1){
-      printf("FAILED TO WRITE INTO THE MEMORY");
-      return;
-      }
-      bytes_tot=write(1,(totalTime[1]/totalCount[1]),strlen((totalTime[1]/totalCount[1])));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 2");
-        return;
-      }
-
-    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 3: ");
-      int bytes_tot=write(1,output1,strlen(output1));
-      if(bytes_tot==-1){
-      printf("FAILED TO WRITE INTO THE MEMORY");
-      return;
-      }
-      bytes_tot=write(1,(totalTime[2]/totalCount[2]),strlen((totalTime[2]/totalCount[2])));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 3");
-        return;
-      }
-
-    output1[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 4: ");
-      int bytes_tot=write(1,output1,strlen(output1));
-      if(bytes_tot==-1){
-      printf("FAILED TO WRITE INTO THE MEMORY");
-      return;
-      }
-      bytes_tot=write(1,(totalTime[3]/totalCount[3]),strlen((totalTime[3]/totalCount[3])));
-      if(bytes_tot==-1){
-        printf("FAILED TO WRITE THE EXECUTION TIME OF PRIORITY 4");
-        return;
-      }
-
-    exit(0);
 }
 int main(int argc, char** argv) {
    member membrs[1000];
@@ -302,7 +207,9 @@ int main(int argc, char** argv) {
    q.low=0;
    q.high=0;
    struct itimerval timer;
-    signal(SIGALRM, handle_alarm);// handler for timer interrupt
+     
+    //signal(SIGALRM, handle_alarm);// handler for timer interrupt
+    //signal(SIGALRM, signal_handler);
     if(argc!=3){
       // this is an error case
       printf("WRONG PARAMETRES GIVEN");
@@ -310,10 +217,19 @@ int main(int argc, char** argv) {
     }
     NCPU=5;
    NCPU = atoi(argv[1]);// no of cpu 
-  
+     
     int TSLICE = atoi(argv[2]);// time slice for round robin
-   
-    timer.it_interval.tv_sec = TSLICE;
+     if(fork()==0){
+        //daemon schedular process  to generate signals
+        while(1){
+         //generate signals after fixed intervals; 
+          //alarm(TSLICE);
+          kill(getppid(), SIGUSR1);// signal is sent to the parent process after every TSLICE
+          sleep(TSLICE);
+        }
+     }
+     else{
+    /*timer.it_interval.tv_sec = TSLICE;
     timer.it_interval.tv_usec = 0;
     timer.it_value.tv_sec = TSLICE;
     timer.it_value.tv_usec = 0;
@@ -321,11 +237,15 @@ int main(int argc, char** argv) {
     if (setitimer(ITIMER_REAL, &timer, NULL) == -1) {
         perror("Error setting timer");
         return 1;
-    }
-
+    }*/
+    signal(SIGUSR1, signal_handler);
+    signal(SIGCHLD,handler_child);
     while (1) {
         shell_loop();
     }
+    //wait(NULL);
+    
+    }
+     
     return 0;
 }
-
