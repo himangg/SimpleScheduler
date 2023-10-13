@@ -1,15 +1,16 @@
 #ifndef SOME_HEADER_GUARD_WITH_UNIQUE_NAME
 #define SOME_HEADER_GUARD_WITH_UNIQUE_NAME
+#include <time.h>
+#include <semaphore.h>
 struct Member{
-   char* command_name[10000];
    int pid;
    int priority;
-   int finished;
-   int running;
+   int finished;// to tell whether the process is finished or not
+   int running;// to tell whether the process is currently running or not
    clock_t lastime;
    clock_t lastime2;
-   double execution_time;
    double wait_time;
+   double execution_time;
    };
 struct Queue{
    int low;
@@ -24,5 +25,6 @@ extern void remove_process(int pid);
 extern queue q;// now this queue will be shared by both the files
 extern int NCPU;
 extern int TSLICE;
+
 // have not handled the case of garbage values
 #endif
