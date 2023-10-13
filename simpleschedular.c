@@ -53,16 +53,16 @@ void schedule_process(){
  // printf("RESUMING THE PROCESS");
   fflush(stdout);
    int ncpu= NCPU;
-   printf("DETAILS OF THE QUEUE ARE\n");
-   printf("VALUE OF Q.LOW IS\n");
-   printf("%d",q.low);
-   printf("VALUE OF Q.HIGH IS\n");
-   printf("%d",q.high);
+   //printf("DETAILS OF THE QUEUE ARE\n");
+   //printf("VALUE OF Q.LOW IS\n");
+   //printf("%d",q.low);
+   //printf("VALUE OF Q.HIGH IS\n");
+   //printf("%d",q.high);
    
    for(i=q.low;i<q.high;i++){
-   printf("FINSIHED STATE\n");
-   printf("%d",q.members[i].finished);
-    fflush(stdout);
+   //printf("FINSIHED STATE\n");
+  // printf("%d",q.members[i].finished);
+    //fflush(stdout);
 }
      for(j=4;j>=1;j--){ 
      int itr=l_idx[j]+1;
@@ -130,3 +130,4 @@ void remove_process(int pid){
        }
         
 }
+
