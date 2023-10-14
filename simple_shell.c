@@ -6,51 +6,17 @@
 #include <sys/time.h>
 #include <time.h>// Include for time function 
 #include <sys/wait.h> // Include for wait function
-#include "helper.h"
-#include <semaphore.h>
-char* history[10000];
-char* pid_table[10000];
-int size1=0;
-char* time_table[10000];
-char* diff_table[10000];
-int diff_sz=0;
-int time_sz=0;
-int size_pid=0;   
+#include "helper.h"  
 int NCPU=0;
 queue q;
-int mpid=-1;
 int create_process_and_run(char *command) {
     // Append a newline character to the command
     size_t len = strlen(command);// this doesnt include the null pointing character 
     if (len == 0 || command[len - 1] != '\n') {
         strcat(command, "\n");
     }
- //Measuring start time of the process
-    clock_t start_time = clock();
-   char pid_str[10000];
-   int p_pid = getpid();
-   snprintf(pid_str, sizeof(pid_str), "%d", p_pid);
-
-// Allocate memory for pid_table[size_pid] and copy pid_str
-   pid_table[size_pid] = (char *)malloc(strlen(pid_str) + 1);
-   strcpy(pid_table[size_pid], pid_str);
-   size_pid++;
-   time_t my_time = time(NULL);
-    char * time_str = ctime(&my_time);
-    time_str[strlen(time_str)-1] = '\0';
-    time_table[time_sz]=(char*)malloc(strlen(time_str)+1);
-    strcpy(time_table[time_sz],time_str);
-    
-    time_sz++;
-// Allocate memory for the time string in time_table  
-
-    //int status = fork();
-   
     int priority=1;
     int i;
-    /*for(i=0;i<strlen(command);i++){
-     if(command[i]<='4' && command[i]>='1')priority=atoi(command[i]);
-    }*/
     char priority_str[2]; // Assuming priority is a single digit, so size 2 including null terminator
     if (command[strlen(command)-3]==' ') {
         priority_str[0] = command[strlen(command)-2];
@@ -78,17 +44,9 @@ int create_process_and_run(char *command) {
         int i;
         for(i=0;i<strlen(command)-1;i++)command_2[i]=command[i];
         strtok(command_2," ");
-        printf("%s","COMMAND_2 AFTER STRTOK IS");
-        printf("%s",command_2);
        char* command_3= strtok(NULL," ");
-       printf("COMMAND_3 is");
-       printf("%s",command_3);
        char* command_4=strtok(NULL," ");
-       printf("COMMAND_4 is");
-       printf("%s",command_4);
-        printf("COMMAND_3 is");
-       printf("%s",command_3);
-       
+
        if(command_4!=NULL){// priority is given as well 
           char *argv[]={"/bin/sh","-c",command_3,NULL};
        execvp("/bin/sh",argv);
@@ -114,6 +72,7 @@ int create_process_and_run(char *command) {
     }
     }
     else{
+    // for commands like ls, pwd,etc regular commands on terminal
       int status = fork();
        if (status < 0) {
         printf("SOME ERROR IS THERE\n");
@@ -174,7 +133,7 @@ void shell_loop() {
         char *command = NULL;
 
         printf("\033[1;32mmy@command:~$\033[0m"); 
-
+         fflush(stdout);
         size_t size = 0;
         int bytes_read=getline(&command, &size, stdin);
         // command is null terminated and contains the '\n'
@@ -182,9 +141,6 @@ void shell_loop() {
          printf("%s","ERROR IN READING IN THE INPUT");
          return ;
         }
-        history[size1]=(char*)malloc(strlen(command)+1);//strlen() doesnt give the null terminated character
-        strcpy(history[size1],command);
-        size1++;
         int i;
         int ok = 1;
         for (i = 0; i < (int)strlen(command); i++) {
@@ -202,10 +158,6 @@ void shell_loop() {
         free(command);
     } while (status);
 }
-/*void handle_alarm(){
-  // call schedular 
-  schedule_process();
-}*/
 void signal_handler(){
    schedule_process();
 }
@@ -250,7 +202,7 @@ void ctrlCHandler(int signum) {
        return;
       }
 
-      char output3[]=("THE EXECTUTION TIME OF THE PROCESS IS :");
+      char output3[]=("THE EXECTUTION TIME OF THE PROCESS IS(IN SECONDS) :");
       bytes_tot=write(1,output3,strlen(output3));
       if(bytes_tot==-1){
         printf("ERROR IN PRINTING EXECUTION TIME OF THE PROCESS");
@@ -264,7 +216,7 @@ void ctrlCHandler(int signum) {
        return;
       }
 
-      char output4[]=("\nTHE WAITING TIME OF THE PROCESS IS :");
+      char output4[]=("\nTHE WAITING TIME OF THE PROCESS IS(IN SECONDS) :");
       bytes_tot=write(1,output4,strlen(output4));
       if(bytes_tot==-1){
         printf("ERROR IN PRINTING WAITING TIME OF THE PROCESS");
@@ -295,7 +247,7 @@ void ctrlCHandler(int signum) {
             totalCount[q.members[i].priority-1]++;
     }
 
-    char output10[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 1: ");
+    char output10[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 1(IN SECONDS): ");
       int bytes_tot=write(1,output10,strlen(output10));
       if(bytes_tot==-1){
       printf("FAILED TO WRITE INTO THE MEMORY");
@@ -319,7 +271,7 @@ void ctrlCHandler(int signum) {
       }
       }
     
-    char output20[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 2: ");
+    char output20[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 2(IN SECONDS): ");
       bytes_tot=write(1,output20,strlen(output20));
       if(bytes_tot==-1){
       printf("FAILED TO WRITE INTO THE MEMORY");
@@ -342,7 +294,7 @@ void ctrlCHandler(int signum) {
         return;
       }
     }
-    char output30[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 3: ");
+    char output30[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 3 (IN SECONDS): ");
       bytes_tot=write(1,output30,strlen(output30));
       if(bytes_tot==-1){
       printf("FAILED TO WRITE INTO THE MEMORY");
@@ -367,7 +319,7 @@ void ctrlCHandler(int signum) {
      }
      
 
-    char output40[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 4: ");
+    char output40[]=("\nAVERAGE EXECUTION TIME OF PRIORITY 4(IN SECONDS): ");
       bytes_tot=write(1,output40,strlen(output40));
       if(bytes_tot==-1){
       printf("FAILED TO WRITE INTO THE MEMORY");
@@ -398,8 +350,6 @@ int main(int argc, char** argv) {
    //queue q={0,0,membrs[1000]};
    q.low=0;
    q.high=0;    
-    //signal(SIGALRM, handle_alarm);// handler for timer interrupt
-    //signal(SIGALRM, signal_handler);
     if(argc!=3){
       // this is an error case
       printf("WRONG PARAMETRES GIVEN");
@@ -409,9 +359,13 @@ int main(int argc, char** argv) {
    NCPU = atoi(argv[1]);// no of cpu 
     
     int TSLICE = atoi(argv[2]);// time slice for round robin
-     if(fork()==0){
-        mpid=getpid();
+    int status1=fork();
+     if(status1<0){
+       printf("ERROR IN FORKING THE PROCESS FOR THE SCHEDULAR");
+     }
+     else if(status1==0){
         //daemon schedular process  to generate signals
+        //runs in background, did not create a grand child because 
         while(1){
          //generate signals after fixed intervals; 
           //alarm(TSLICE);
@@ -421,16 +375,6 @@ int main(int argc, char** argv) {
         }
      }
      else{
-    /*timer.it_interval.tv_sec = TSLICE;
-    timer.it_interval.tv_usec = 0;
-    timer.it_value.tv_sec = TSLICE;
-    timer.it_value.tv_usec = 0;
-    signal(SIGALRM, handle_alarm);
-    if (setitimer(ITIMER_REAL, &timer, NULL) == -1) {
-        perror("Error setting timer");
-        return 1;
-    }*/
-   // mpid=getpid();
     signal(SIGUSR1, signal_handler);
     signal(SIGCHLD,handler_child);
     signal(SIGINT,ctrlCHandler);
