@@ -9,7 +9,8 @@ The simple_schedular.c basically contains functions like add_process() for addin
 
 
 Contributions-
-Rishabh Jay- Implemented the functions of the simpleschedular from scratch, and the helper header file, and modified the earlier implemented simple_shell.c to work with simpleschedualar.c.Also, tested the implementations with some slow - to high time taking exectuables, such as counting the number of the primes upto 1e9.
+Rishabh Jay- Implemented the functions of the simpleschedular from scratch, and the helper header file, and modified the earlier implemented simple_shell.c to work with simpleschedualar.c.Also, tested the implementations with some slow - to high time taking exectuables, such as counting the number of the primes upto 1e9, and also debugged.
+
 Himang Chandra Garg-Implemented the schedular with the calculation of wait time and execution time in the schedular. Printed the final details of the final details of the process according to their priority.
 Handled the error in priority calculations with a few other corrections.
 Also tested the code using several testcases and debugged accordingly
