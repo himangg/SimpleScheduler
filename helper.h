@@ -7,8 +7,8 @@ struct Member{
    int priority;
    int finished;// to tell whether the process is finished or not
    int running;// to tell whether the process is currently running or not
-   clock_t lastime;
-   clock_t lastime2;
+   time_t lastime;
+   time_t lastime2;
    double wait_time;
    double execution_time;
    char  command[10000];
