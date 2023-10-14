@@ -52,14 +52,12 @@ int create_process_and_run(char *command) {
      if(command[i]<='4' && command[i]>='1')priority=atoi(command[i]);
     }*/
     char priority_str[2]; // Assuming priority is a single digit, so size 2 including null terminator
-for (i = 0; i < strlen(command); i++) {
-    if (command[i] >= '1' && command[i] <= '4') {
-        priority_str[0] = command[i];
+    if (command[strlen(command)-3]==' ') {
+        priority_str[0] = command[strlen(command)-2];
         priority_str[1] = '\0'; // Null-terminate the string
         priority = atoi(priority_str);
-        break;
     }
-}
+
     if(command[0]=='s' && command[1]=='u'){
     int status = fork();
     int pid=status;
@@ -133,12 +131,8 @@ for (i = 0; i < strlen(command); i++) {
         }
         if(status >0){
         wait(NULL);
-        
+
         }
-    
-    
-    
-    
     }
     
    
