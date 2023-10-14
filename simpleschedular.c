@@ -28,7 +28,7 @@ void add_process(int pid, int priority,char* command2){
     q.members[q.high].running=0;
     q.members[q.high].priority=priority;
     printf("THE IDX IS\n");
-    printf("%d",q.high);
+    printf("%d\n",q.high);
     q.high++;  
 }
 void schedule_process(){
@@ -36,7 +36,7 @@ void schedule_process(){
     int i;
     // pausing the currently running process 
     
-    printf("SCHEDULING PROCESS");
+    printf("SCHEDULING PROCESS\n");
     fflush(stdout);
      // maintain the last index of every priority
      int l_idx[5];
@@ -140,12 +140,10 @@ void remove_process(int pid){
          if(q.members[i].pid==pid){
           q.members[i].execution_time=q.members[i].execution_time+((double) (clock() - q.members[i].lastime2))/CLOCKS_PER_SEC;
           q.members[i].finished=1;
-          printf("REMOVED SUCCESFULLY");
+          printf("REMOVED SUCCESFULLY\n");
           q.members[i].running=0;
           break;
          }
        }
         
 }
-
-
