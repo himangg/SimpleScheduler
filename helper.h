@@ -9,6 +9,7 @@ struct Member{
    int running;// to tell whether the process is currently running or not
    time_t lastime;
    time_t lastime2;
+   int lastrun;
    double wait_time;
    double execution_time;
    char  command[10000];
