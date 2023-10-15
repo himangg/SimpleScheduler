@@ -9,6 +9,7 @@
 #include "helper.h"  
 int NCPU=0;
 queue q;
+int TSLICE=0;
 int create_process_and_run(char *command) {
     // Append a newline character to the command
     size_t len = strlen(command);// this doesnt include the null pointing character 
@@ -355,10 +356,11 @@ int main(int argc, char** argv) {
       printf("WRONG PARAMETRES GIVEN");
       return -1;
     }
+   TSLICE=5;
     NCPU=5;
    NCPU = atoi(argv[1]);// no of cpu 
     
-    int TSLICE = atoi(argv[2]);// time slice for round robin
+   TSLICE = atoi(argv[2]);// time slice for round robin
     int status1=fork();
      if(status1<0){
        printf("ERROR IN FORKING THE PROCESS FOR THE SCHEDULAR");
