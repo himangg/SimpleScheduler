@@ -6,7 +6,7 @@
 
 extern int NCPU;
 extern queue q;
-
+extern int TSLICE;
 void add_process(int pid, int priority,char* command2){
     // create a new member with pid=pid and priority =priority
     printf("THE COMMAND IS\n");
@@ -19,13 +19,17 @@ void add_process(int pid, int priority,char* command2){
     m.running=0;
     strcpy(m.command,command2);
     // now add this member into the priority queue
-    m.lastime=clock();// saving the time for calculation of wait time
+    //m.lastime=clock();// saving the time for calculation of wait time
     m.wait_time=0;
     m.execution_time=0;
     q.members[q.high]=m;
-    q.members[q.high].lastime=time(NULL);
+    time_t start_time = time(NULL); // Store the start time
+    q.members[q.high].lastime = start_time;
+   // q.members[q.high].lastime=time(NULL);
+    
     q.members[q.high].finished=0;
     q.members[q.high].running=0;
+    q.members[q.high].lastrun=0;
     q.members[q.high].priority=priority;
     printf("THE IDX IS\n");
     printf("%d\n",q.high);
@@ -46,12 +50,18 @@ void schedule_process(){
      l_idx[1]=-1;
     for(i=q.low;i<q.high;i++){
       if(q.members[i].running==1 && q.members[i].finished==0){q.members[i].running=0;
-      kill(q.members[i].pid,SIGSTOP);
-          q.members[i].lastime=time(NULL);
+         //q.members[i].lastime=time(NULL);
+          time_t start_time2 = time(NULL); 
+          printf("PROCESS PAUSED");
+          q.members[i].lastime = start_time2;
+          q.members[i].lastrun=1;
           time_t endtime=time(NULL);
         q.members[i].execution_time+= difftime(endtime, q.members[i].lastime2);
-       l_idx[q.members[i].priority]=i;
+         l_idx[q.members[i].priority]=i;
        q.members[i].running=0;
+      kill(q.members[i].pid,SIGSTOP);
+       
+      
       }
     
     }
@@ -60,25 +70,10 @@ void schedule_process(){
  // printf("RESUMING THE PROCESS");
   fflush(stdout);
    int ncpu= NCPU;
-   //printf("DETAILS OF THE QUEUE ARE\n");
-   //printf("VALUE OF Q.LOW IS\n");
-   //printf("%d",q.low);
-   //printf("VALUE OF Q.HIGH IS\n");
-   //printf("%d",q.high);
-   
-   for(i=q.low;i<q.high;i++){
-   //printf("FINSIHED STATE\n");
-  // printf("%d",q.members[i].finished);
-    //fflush(stdout);
-}
      for(j=4;j>=1;j--){ 
      int itr=l_idx[j]+1;
      //printf("EXECUTED");
      fflush(stdout);
-     //printf("VALUE OF J IS\n");
-     //printf("%d",j);
-     //printf("VALUE OF l_idx[j] is");
-     //printf("%d",l_idx[j]);
      if(itr==q.high)itr=q.low;
      if(l_idx[j]!=-1){
      while(itr!=l_idx[j]){
@@ -89,7 +84,12 @@ void schedule_process(){
            
             q.members[itr].running=1;
             time_t end_time=time(NULL);
-            q.members[itr].wait_time+=difftime(end_time ,q.members[itr].lastime);
+            if(q.members[itr].lastrun==0){
+            q.members[itr].wait_time+=(difftime(end_time ,q.members[itr].lastime));
+            }
+            if(q.members[itr].lastrun==1){
+              q.members[itr].wait_time+=(difftime(end_time ,q.members[itr].lastime)+TSLICE);
+            }
              q.members[itr].lastime2=time(NULL);
             printf("IDX IS");
             printf("%d",itr);
@@ -107,12 +107,19 @@ void schedule_process(){
            q.members[itr].running=1;      
             printf("%s",q.members[itr].command);
             time_t endtime=time(NULL);
-            q.members[itr].wait_time+=difftime(endtime, q.members[itr].lastime);
+               printf("Saved time: %s", ctime(&q.members[itr].lastime));
+                 printf("Current time: %s", ctime(&endtime));
+            if(q.members[itr].lastrun==0){
+            q.members[itr].wait_time+=(difftime(endtime ,q.members[itr].lastime));
+            }
+            if(q.members[itr].lastrun==1){
+              q.members[itr].wait_time+=(difftime(endtime ,q.members[itr].lastime)+TSLICE);
+            }
             q.members[itr].lastime2=time(NULL);
             kill(q.members[itr].pid,SIGCONT);
-            
             ncpu--;
          }
+         
      
      }
      else{
@@ -125,7 +132,12 @@ void schedule_process(){
             
              q.members[i].running=1;
              time_t endtime=time(NULL);
-             q.members[i].wait_time+=difftime(endtime,q.members[i].lastime);
+              if(q.members[i].lastrun==0){
+            q.members[i].wait_time+=(difftime(endtime ,q.members[i].lastime));
+            }
+            if(q.members[i].lastrun==1){
+              q.members[i].wait_time+=(difftime(endtime ,q.members[i].lastime)+TSLICE);
+            }
               q.members[i].lastime2=time(NULL);
              kill(q.members[i].pid,SIGCONT);
              ncpu--;
@@ -133,6 +145,8 @@ void schedule_process(){
        }
      }
      }
+     //reset all lastime to 0
+     for(i=q.low;i<q.high;i++)q.members[i].lastrun=0;
   
 }
 void remove_process(int pid){
